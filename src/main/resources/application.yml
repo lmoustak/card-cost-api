@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: Card Cost API
+  cache:
+    redis:
+      time-to-live: 10m
+  data:
+    redis:
+      host: redis
+  datasource:
+    url: jdbc:mysql://localhost:3306/card_cost_db
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
