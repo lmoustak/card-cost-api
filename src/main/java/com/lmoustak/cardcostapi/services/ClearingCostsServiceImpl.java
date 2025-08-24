@@ -27,7 +27,7 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
   @Caching(
       put = {
           @CachePut(value = "clearingCosts", key = "#result.id"),
-          @CachePut(value = "clearingCosts", key = "#country", condition = "#country!=null"),
+          @CachePut(value = "clearingCosts", key = "#country", condition = "#country!=null")
       },
       evict = {
           @CacheEvict(value = "clearingCosts", key = "#result.id"),
@@ -85,7 +85,7 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
   @Caching(
       put = {
           @CachePut(value = "clearingCosts", key = "#result.id"),
-          @CachePut(value = "clearingCosts", key = "#country", condition = "#country!=null"),
+          @CachePut(value = "clearingCosts", key = "#country", condition = "#country!=null")
       },
       evict = {
           @CacheEvict(value = "clearingCosts", key = "#result.id"),

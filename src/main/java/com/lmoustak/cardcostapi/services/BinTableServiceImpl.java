@@ -1,9 +1,9 @@
 package com.lmoustak.cardcostapi.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lmoustak.cardcostapi.dtos.BinTableResponse;
 import com.lmoustak.cardcostapi.exceptions.BinTableException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
@@ -13,13 +13,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 
 @Service
 public class BinTableServiceImpl implements BinTableService {
 
+  private static final ObjectMapper objectMapper = new ObjectMapper();
   private final RestClient restClient;
 
   public BinTableServiceImpl(@Value("${bintable.api-key}") String apiKey) {
@@ -46,13 +45,12 @@ public class BinTableServiceImpl implements BinTableService {
         .retrieve()
         .onStatus(HttpStatusCode::isError, (req, res) -> {
           try (InputStream is = res.getBody()) {
-            String errorResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            throw new BinTableException(res.getStatusCode(), errorResponse);
+            BinTableResponse errorResponse = objectMapper.readValue(is.readAllBytes(),
+                BinTableResponse.class);
+            throw new BinTableException(res.getStatusCode(), errorResponse.getMessage());
           }
         })
         .body(BinTableResponse.class);
-
-    System.out.println("Finished request");
 
     return response.getData().getCountry().getCode();
   }
