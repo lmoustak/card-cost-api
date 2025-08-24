@@ -19,8 +19,8 @@ public interface ClearingCostsService {
 
   ClearingCosts updateClearingCosts(String country, BigDecimal price);
 
-  void deleteClearingCosts(Long id);
+  ClearingCosts deleteClearingCosts(Long id);
 
-  void deleteClearingCostsByCountry(String country);
+  ClearingCosts deleteClearingCostsByCountry(String country);
 
 }
