@@ -1,6 +1,7 @@
 package com.lmoustak.cardcostapi.controllers;
 
 import com.lmoustak.cardcostapi.exceptions.BinTableException;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.net.URI;
 import java.util.HashMap;
@@ -48,6 +49,20 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     problemDetail.setInstance(URI.create(request.getContextPath()));
 
     return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+        .body(problemDetail);
+  }
+
+  @ExceptionHandler(EntityExistsException.class)
+  public ResponseEntity<ProblemDetail> handleConflict(EntityExistsException e,
+      WebRequest request) {
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+        e.getMessage());
+
+    problemDetail.setTitle("Resource already exists");
+    problemDetail.setInstance(URI.create(request.getContextPath()));
+
+    return ResponseEntity.status(HttpStatus.CONFLICT.value())
         .contentType(MediaType.APPLICATION_PROBLEM_JSON)
         .body(problemDetail);
   }

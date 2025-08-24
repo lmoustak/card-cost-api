@@ -13,8 +13,7 @@ public interface ClearingCostsRepository extends JpaRepository<ClearingCosts, Lo
 
   @Query("""
       FROM ClearingCosts
-      WHERE (:country IS NULL AND country IS NULL)
-         OR LOWER(country) = LOWER(:country)
+      WHERE LOWER(country) = LOWER(:country)
       """)
   Optional<ClearingCosts> findByCountry(String country);
 

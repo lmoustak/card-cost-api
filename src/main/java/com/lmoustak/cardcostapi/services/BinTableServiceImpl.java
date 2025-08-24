@@ -2,6 +2,9 @@ package com.lmoustak.cardcostapi.services;
 
 import com.lmoustak.cardcostapi.dtos.BinTableResponse;
 import com.lmoustak.cardcostapi.exceptions.BinTableException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,22 +44,15 @@ public class BinTableServiceImpl implements BinTableService {
     BinTableResponse response = restClient.get()
         .uri("/{bin}?api_key={apiKey}", Map.of("bin", bin))
         .retrieve()
+        .onStatus(HttpStatusCode::isError, (req, res) -> {
+          try (InputStream is = res.getBody()) {
+            String errorResponse = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            throw new BinTableException(res.getStatusCode(), errorResponse);
+          }
+        })
         .body(BinTableResponse.class);
 
-    if (response == null) {
-      throw new NullPointerException("Response from bintable.com was null");
-    }
-
-    Integer result = response.getResult();
-    if (result == null) {
-      throw new NullPointerException("Result HTTP code from bintable.com was null");
-    }
-
-    String message = response.getMessage();
-    HttpStatusCode status = HttpStatusCode.valueOf(response.getResult());
-    if (status.isError()) {
-      throw new BinTableException(status, message);
-    }
+    System.out.println("Finished request");
 
     return response.getData().getCountry().getCode();
   }

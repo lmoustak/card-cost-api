@@ -82,6 +82,21 @@ public class ClearingCostsController {
           }
       )
   )
+  @ApiResponse(
+      responseCode = "409",
+      description = "Clearing costs for country already exists",
+      content = @Content(
+          schema = @Schema(implementation = ProblemDetail.class),
+          examples = @ExampleObject("""
+              {
+                  "title": "Resource already exists",
+                  "status": 409,
+                  "description": "There already exists a clearing cost for country {country}",
+                  "instance": "http://localhost:8080/clearing-costs"
+              }
+              """)
+      )
+  )
   @PostMapping
   public ResponseEntity<ClearingCosts> createClearingCosts(
       @RequestBody ClearingCostsRequest request) {

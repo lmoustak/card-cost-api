@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,11 +24,26 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
   }
 
   @Override
-  @CachePut("clearingCosts")
+  @Caching(
+      put = {
+          @CachePut(value = "clearingCosts", key = "#result.id"),
+          @CachePut(value = "clearingCosts", key = "#country", condition = "#country!=null"),
+      },
+      evict = {
+          @CacheEvict(value = "clearingCosts", key = "#result.id"),
+          @CacheEvict(value = "clearingCosts", key = "#country", condition = "#country!=null")
+      }
+  )
   public ClearingCosts createClearingCosts(String country, BigDecimal price) {
     Objects.requireNonNull(price, "`price` should not be null");
 
-    Optional<ClearingCosts> optionalClearingCosts = clearingCostsRepository.findByCountry(country);
+    Optional<ClearingCosts> optionalClearingCosts;
+    if (country == null) {
+      optionalClearingCosts = clearingCostsRepository.findByCountryIsNull();
+    } else {
+      optionalClearingCosts = clearingCostsRepository.findByCountry(country);
+    }
+
     if (optionalClearingCosts.isPresent()) {
       throw new EntityExistsException(
           "There already exists a clearing cost for country " + country);
@@ -66,21 +82,44 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
   }
 
   @Override
-  @CachePut("clearingCosts")
+  @Caching(
+      put = {
+          @CachePut(value = "clearingCosts", key = "#result.id"),
+          @CachePut(value = "clearingCosts", key = "#country", condition = "#country!=null"),
+      },
+      evict = {
+          @CacheEvict(value = "clearingCosts", key = "#result.id"),
+          @CacheEvict(value = "clearingCosts", key = "#country", condition = "#country!=null")
+      }
+  )
   public ClearingCosts updateClearingCosts(String country, BigDecimal price) {
     Objects.requireNonNull(price, "`price` should not be null");
 
-    ClearingCosts clearingCosts = clearingCostsRepository.findByCountry(country)
-        .orElseThrow(
-            () -> new EntityNotFoundException(
-                "No clearing costs for country='%s' found".formatted(country)));
+    Optional<ClearingCosts> optionalClearingCosts;
+    if (country == null) {
+      optionalClearingCosts = clearingCostsRepository.findByCountryIsNull();
+    } else {
+      optionalClearingCosts = clearingCostsRepository.findByCountry(country);
+    }
+
+    if (optionalClearingCosts.isEmpty()) {
+      throw new EntityNotFoundException(
+          "No clearing costs for country='%s' found".formatted(country));
+    }
+
+    ClearingCosts clearingCosts = optionalClearingCosts.get();
 
     clearingCosts.setPrice(price);
     return clearingCostsRepository.save(clearingCosts);
   }
 
   @Override
-  @CacheEvict("clearingCosts")
+  @Caching(
+      evict = {
+          @CacheEvict(value = "clearingCosts", key = "#id"),
+          @CacheEvict(value = "clearingCosts", key = "#result.country", condition = "#result.country!=null")
+      }
+  )
   public ClearingCosts deleteClearingCosts(Long id) {
     Objects.requireNonNull(id, "`id` should not be null");
 
@@ -93,12 +132,27 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
   }
 
   @Override
-  @CacheEvict("clearingCosts")
+  @Caching(
+      evict = {
+          @CacheEvict(value = "clearingCosts", key = "#result.id"),
+          @CacheEvict(value = "clearingCosts", key = "#country", condition = "#country!=null")
+      }
+  )
   public ClearingCosts deleteClearingCostsByCountry(String country) {
-    ClearingCosts clearingCosts = clearingCostsRepository.findByCountry(country)
-        .orElseThrow(
-            () -> new EntityNotFoundException(
-                "No clearing costs for country='%s' found".formatted(country)));
+
+    Optional<ClearingCosts> optionalClearingCosts;
+    if (country == null) {
+      optionalClearingCosts = clearingCostsRepository.findByCountryIsNull();
+    } else {
+      optionalClearingCosts = clearingCostsRepository.findByCountry(country);
+    }
+
+    if (optionalClearingCosts.isEmpty()) {
+      throw new EntityNotFoundException(
+          "No clearing costs for country='%s' found".formatted(country));
+    }
+
+    ClearingCosts clearingCosts = optionalClearingCosts.get();
 
     clearingCostsRepository.delete(clearingCosts);
     return clearingCosts;
