@@ -14,7 +14,7 @@ import java.util.StringJoiner;
 public class ClearingCostsRequest implements Serializable {
 
   @Parameter(description = "The 2-letter country code. In lower case. May be null.")
-  @Pattern(regexp = "[a-z]{2}", message = "`country` should either be null or two lowercase letters long")
+  @Pattern(regexp = "[A-Za-z]{2}", message = "`country` should either be null or two letters long")
   private String country;
 
   @Parameter(description = "The clearing price for the country. Must not be negative.", required = true)

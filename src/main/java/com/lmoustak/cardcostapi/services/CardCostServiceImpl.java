@@ -21,12 +21,6 @@ public class CardCostServiceImpl implements CardCostService {
 
   @Override
   public CardCostDto findCardCostFromIssuerIdentificationNumber(String issuerIdentificationNumber) {
-    Objects.requireNonNull(issuerIdentificationNumber, "IIN should not be null");
-
-    if (issuerIdentificationNumber.length() < 6) {
-      throw new IllegalArgumentException("The IIN should be at least 6 digits long");
-    }
-
     String country = binTableService.getCountryFromIssuerIdentificationNumber(
         issuerIdentificationNumber);
     Optional<ClearingCosts> optionalClearingCosts = clearingCostsService.readClearingCostsByCountry(

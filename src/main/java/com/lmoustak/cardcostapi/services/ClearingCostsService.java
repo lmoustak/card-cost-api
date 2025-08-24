@@ -17,10 +17,10 @@ public interface ClearingCostsService {
 
   List<ClearingCosts> readClearingCostsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice);
 
-  boolean updateClearingCosts(String country, BigDecimal price);
+  ClearingCosts updateClearingCosts(String country, BigDecimal price);
 
-  boolean deleteClearingCosts(Long id);
+  void deleteClearingCosts(Long id);
 
-  boolean deleteClearingCostsByCountry(String country);
+  void deleteClearingCostsByCountry(String country);
 
 }

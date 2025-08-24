@@ -1,7 +1,9 @@
 package com.lmoustak.cardcostapi.services;
 
 import com.lmoustak.cardcostapi.dtos.BinTableResponse;
+import com.lmoustak.cardcostapi.exceptions.BinTableException;
 import java.util.Map;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +30,13 @@ public class BinTableServiceImpl implements BinTableService {
   @Override
   @Cacheable(cacheNames = "bins")
   public String getCountryFromIssuerIdentificationNumber(String issuerIdentificationNumber) {
+
+    Objects.requireNonNull(issuerIdentificationNumber, "IIN should not be null");
+
+    if (issuerIdentificationNumber.length() < 6) {
+      throw new IllegalArgumentException("The IIN should be at least 6 digits long");
+    }
+
     String bin = issuerIdentificationNumber.substring(0, 6);
     BinTableResponse response = restClient.get()
         .uri("/{bin}?api_key={apiKey}", Map.of("bin", bin))
@@ -45,10 +54,8 @@ public class BinTableServiceImpl implements BinTableService {
 
     String message = response.getMessage();
     HttpStatusCode status = HttpStatusCode.valueOf(response.getResult());
-    if (status.is4xxClientError()) {
-      throw new HttpClientErrorException(status, message);
-    } else if (status.is5xxServerError()) {
-      throw new HttpServerErrorException(status, message);
+    if (status.isError()) {
+      throw new BinTableException(status, message);
     }
 
     return response.getData().getCountry().getCode();

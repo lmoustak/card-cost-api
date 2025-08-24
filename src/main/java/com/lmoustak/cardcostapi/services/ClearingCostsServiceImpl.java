@@ -67,7 +67,7 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
 
   @Override
   @CachePut("clearingCosts")
-  public boolean updateClearingCosts(String country, BigDecimal price) {
+  public ClearingCosts updateClearingCosts(String country, BigDecimal price) {
     Objects.requireNonNull(price, "`price` should not be null");
 
     ClearingCosts clearingCosts = clearingCostsRepository.findByCountry(country)
@@ -76,13 +76,12 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
                 "No clearing costs for country='%s' found".formatted(country)));
 
     clearingCosts.setPrice(price);
-    clearingCostsRepository.save(clearingCosts);
-    return true;
+    return clearingCostsRepository.save(clearingCosts);
   }
 
   @Override
   @CacheEvict("clearingCosts")
-  public boolean deleteClearingCosts(Long id) {
+  public void deleteClearingCosts(Long id) {
     Objects.requireNonNull(id, "`id` should not be null");
 
     ClearingCosts clearingCosts = clearingCostsRepository.findById(id)
@@ -90,18 +89,16 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
             () -> new EntityNotFoundException("No clearing costs for id=%d found".formatted(id)));
 
     clearingCostsRepository.delete(clearingCosts);
-    return true;
   }
 
   @Override
   @CacheEvict("clearingCosts")
-  public boolean deleteClearingCostsByCountry(String country) {
+  public void deleteClearingCostsByCountry(String country) {
     ClearingCosts clearingCosts = clearingCostsRepository.findByCountry(country)
         .orElseThrow(
             () -> new EntityNotFoundException(
                 "No clearing costs for country='%s' found".formatted(country)));
 
     clearingCostsRepository.delete(clearingCosts);
-    return true;
   }
 }
