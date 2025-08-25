@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
@@ -21,12 +22,17 @@ public class BinTableServiceImpl implements BinTableService {
   private static final ObjectMapper objectMapper = new ObjectMapper();
   private final RestClient restClient;
 
+  @Autowired
   public BinTableServiceImpl(@Value("${bintable.api-key}") String apiKey) {
     restClient = RestClient.builder()
         .baseUrl("https://api.bintable.com/v1")
         .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .defaultUriVariables(Map.of("apiKey", apiKey))
         .build();
+  }
+
+  public BinTableServiceImpl(RestClient restClient) {
+    this.restClient = restClient;
   }
 
   @Override

@@ -3,7 +3,6 @@ package com.lmoustak.cardcostapi.services;
 import com.lmoustak.cardcostapi.dtos.CardCostDto;
 import com.lmoustak.cardcostapi.entities.ClearingCosts;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Objects;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
