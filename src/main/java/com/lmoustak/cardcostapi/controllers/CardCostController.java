@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 )
 @Tag(name = "card-cost", description = "Calculates the clearing cost of a card")
 public class CardCostController {
+
+  private static final Logger logger = LoggerFactory.getLogger(CardCostController.class);
 
   private final CardCostService cardCostService;
 
@@ -146,6 +150,7 @@ public class CardCostController {
       @Validated
       CardCostRequest request
   ) {
+    logger.debug("Calling POST /payment-cards-cost with request body: {}", request);
     return cardCostService.findCardCostFromIssuerIdentificationNumber(request.getCard_number());
   }
 }

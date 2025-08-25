@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 )
 @Tag(name = "clearing-costs", description = "Performs CRUD operations on the clearing cost matrix")
 public class ClearingCostsController {
+
+  private static final Logger logger = LoggerFactory.getLogger(ClearingCostsController.class);
 
   private final ClearingCostsService clearingCostsService;
 
@@ -100,6 +104,7 @@ public class ClearingCostsController {
   @PostMapping
   public ResponseEntity<ClearingCosts> createClearingCosts(
       @RequestBody ClearingCostsRequest request) {
+    logger.debug("Calling POST /clearing-costs with request body {}", request);
     ClearingCosts clearingCosts = clearingCostsService.createClearingCosts(request.getCountry(),
         request.getPrice());
 
@@ -124,6 +129,7 @@ public class ClearingCostsController {
   )
   @GetMapping
   public List<ClearingCosts> getAllClearingCosts() {
+    logger.debug("Calling GET /clearing-costs");
     return clearingCostsService.readAllClearingCosts();
   }
 
@@ -138,6 +144,7 @@ public class ClearingCostsController {
   )
   @GetMapping("/{id}")
   public ClearingCosts getClearingCostsById(@PathVariable Long id) {
+    logger.debug("Calling GET /clearing-costs/{}", id);
     return clearingCostsService.readClearingCostsById(id)
         .orElseThrow(
             () -> new EntityNotFoundException("No clearing costs for id=%d found".formatted(id)));
@@ -169,6 +176,7 @@ public class ClearingCostsController {
   )
   @GetMapping("/country/{country}")
   public ClearingCosts getClearingCostsByCountry(@PathVariable String country) {
+    logger.debug("Calling GET /clearing-costs/country/{}", country);
     return clearingCostsService.readClearingCostsByCountry(country)
         .orElseThrow(
             () -> new EntityNotFoundException(
@@ -191,6 +199,8 @@ public class ClearingCostsController {
       @RequestParam(required = false) BigDecimal minPrice,
       @RequestParam(required = false) BigDecimal maxPrice
   ) {
+    logger.debug("Calling GET /clearing-costs/priceRange?minPrice={}&maxPrice={}", minPrice,
+        maxPrice);
     return clearingCostsService.readClearingCostsByPriceRange(minPrice, maxPrice);
   }
 
@@ -237,6 +247,7 @@ public class ClearingCostsController {
   )
   @PutMapping
   public ClearingCosts updateClearingCosts(@RequestBody ClearingCostsRequest request) {
+    logger.debug("Calling PUT /clearing-costs with request body {}", request);
     return clearingCostsService.updateClearingCosts(request.getCountry(), request.getPrice());
   }
 
@@ -277,6 +288,7 @@ public class ClearingCostsController {
   )
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteClearingCostsById(@PathVariable Long id) {
+    logger.debug("Calling DELETE /clearing-costs/{}", id);
     clearingCostsService.deleteClearingCosts(id);
 
     return ResponseEntity.noContent().build();
@@ -306,6 +318,7 @@ public class ClearingCostsController {
   public ResponseEntity<Void> deleteClearingCostsByCountry(
       @RequestParam(required = false) String country
   ) {
+    logger.debug("Calling DELETE /clearing-costs?country={}", country);
     clearingCostsService.deleteClearingCostsByCountry(country);
 
     return ResponseEntity.noContent().build();

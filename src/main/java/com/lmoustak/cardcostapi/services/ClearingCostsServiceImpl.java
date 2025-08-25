@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ClearingCostsServiceImpl implements ClearingCostsService {
+
+  private static final Logger logger = LoggerFactory.getLogger(ClearingCostsServiceImpl.class);
 
   private final ClearingCostsRepository clearingCostsRepository;
 
@@ -35,6 +39,8 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
       }
   )
   public ClearingCosts createClearingCosts(String country, BigDecimal price) {
+    logger.debug("START createClearingCosts('{}', {})", country, price);
+
     Objects.requireNonNull(price, "`price` should not be null");
 
     Optional<ClearingCosts> optionalClearingCosts;
@@ -45,15 +51,20 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
     }
 
     if (optionalClearingCosts.isPresent()) {
+      logger.error("An entity for country '{}' already exists. Throwing...", country);
       throw new EntityExistsException(
           "There already exists a clearing cost for country " + country);
+    } else {
+      logger.debug("No entry for country '{}' exists yet. Creating...", country);
     }
 
     var clearingCosts = new ClearingCosts();
     clearingCosts.setCountry(country);
     clearingCosts.setPrice(price);
 
-    return clearingCostsRepository.save(clearingCosts);
+    ClearingCosts newEntity = clearingCostsRepository.save(clearingCosts);
+    logger.debug("END createClearingCosts('{}', {}) returns {}", country, price, newEntity);
+    return newEntity;
   }
 
   @Override
@@ -93,6 +104,7 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
       }
   )
   public ClearingCosts updateClearingCosts(String country, BigDecimal price) {
+    logger.debug("START updateClearingCosts('{}', {})", country, price);
     Objects.requireNonNull(price, "`price` should not be null");
 
     Optional<ClearingCosts> optionalClearingCosts;
@@ -103,14 +115,18 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
     }
 
     if (optionalClearingCosts.isEmpty()) {
+      logger.error("No clearing costs entity found for country '{}'. Throwing...", country);
       throw new EntityNotFoundException(
           "No clearing costs for country='%s' found".formatted(country));
     }
 
     ClearingCosts clearingCosts = optionalClearingCosts.get();
+    logger.debug("Found clearing costs entity {}", clearingCosts);
 
     clearingCosts.setPrice(price);
-    return clearingCostsRepository.save(clearingCosts);
+    ClearingCosts updatedEntity = clearingCostsRepository.save(clearingCosts);
+    logger.debug("END updateClearingCosts('{}', {}) returns {}", country, price, updatedEntity);
+    return updatedEntity;
   }
 
   @Override
@@ -121,13 +137,19 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
       }
   )
   public ClearingCosts deleteClearingCosts(Long id) {
+    logger.debug("START deleteClearingCosts({})", id);
     Objects.requireNonNull(id, "`id` should not be null");
 
     ClearingCosts clearingCosts = clearingCostsRepository.findById(id)
         .orElseThrow(
-            () -> new EntityNotFoundException("No clearing costs for id=%d found".formatted(id)));
+            () -> {
+              logger.error("No clearing costs entity found for id {}", id);
+              return new EntityNotFoundException("No clearing costs for id=%d found".formatted(id));
+            });
 
+    logger.debug("Found clearing costs entity {}", clearingCosts);
     clearingCostsRepository.delete(clearingCosts);
+    logger.debug("END deleteClearingCosts({}) returns {}", id, clearingCosts);
     return clearingCosts;
   }
 
@@ -139,7 +161,7 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
       }
   )
   public ClearingCosts deleteClearingCostsByCountry(String country) {
-
+    logger.debug("START deleteClearingCostsByCountry('{}')", country);
     Optional<ClearingCosts> optionalClearingCosts;
     if (country == null) {
       optionalClearingCosts = clearingCostsRepository.findByCountryIsNull();
@@ -148,13 +170,16 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
     }
 
     if (optionalClearingCosts.isEmpty()) {
+      logger.error("No clearing costs entity found for country '{}'", country);
       throw new EntityNotFoundException(
           "No clearing costs for country='%s' found".formatted(country));
     }
 
     ClearingCosts clearingCosts = optionalClearingCosts.get();
+    logger.debug("Found clearing costs entity {}", clearingCosts);
 
     clearingCostsRepository.delete(clearingCosts);
+    logger.debug("END deleteClearingCostsByCountry({}) returns {}", country, clearingCosts);
     return clearingCosts;
   }
 }
