@@ -47,6 +47,7 @@ public class ClearingCostsServiceImpl implements ClearingCostsService {
     if (country == null) {
       optionalClearingCosts = clearingCostsRepository.findByCountryIsNull();
     } else {
+      country = country.toLowerCase();
       optionalClearingCosts = clearingCostsRepository.findByCountry(country);
     }
 

@@ -14,7 +14,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      BINTABLE_API_KEY: "<Your BINTable API key here}>"
+      BINTABLE_API_KEY: "<Your BINTable API key here>"
 
   db:
     image: 'postgres:13.22-alpine'
